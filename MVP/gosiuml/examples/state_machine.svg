@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700">
+  <title>GosiUML State Machine</title>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0,0 9,3 0,6" fill="#666"/>
+    </marker>
+  </defs>
+  <rect width="900" height="700" fill="#f8f9fa"/>
+  <text x="450" y="30" text-anchor="middle" font-size="20" font-weight="bold">GosiUML Phenomenological State Machine</text>
+  <rect x="50" y="80" width="120" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+  <text x="110" y="115" text-anchor="middle">NIL</text>
+  <rect x="250" y="80" width="120" height="60" fill="#e8f5e9" stroke="#4caf50" stroke-width="2" rx="5"/>
+  <text x="310" y="115" text-anchor="middle">ALLOCATED</text>
+  <rect x="450" y="80" width="120" height="60" fill="#fff3e0" stroke="#ff9800" stroke-width="2" rx="5"/>
+  <text x="510" y="115" text-anchor="middle">LOCKED</text>
+  <rect x="650" y="80" width="120" height="60" fill="#f3e5f5" stroke="#9c27b0" stroke-width="2" rx="5"/>
+  <text x="710" y="115" text-anchor="middle">ACTIVE</text>
+  <rect x="650" y="280" width="120" height="60" fill="#ffebee" stroke="#f44336" stroke-width="2" rx="5"/>
+  <text x="710" y="315" text-anchor="middle">DEGRADED</text>
+  <rect x="350" y="280" width="120" height="60" fill="#e0f2f1" stroke="#009688" stroke-width="2" rx="5"/>
+  <text x="410" y="315" text-anchor="middle">SHARED</text>
+  <rect x="350" y="480" width="120" height="60" fill="#eceff1" stroke="#607d8b" stroke-width="2" rx="5"/>
+  <text x="410" y="515" text-anchor="middle">FREED</text>
+  <!-- Transitions -->
+  <path d="M 170 110 L 250 110" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="210" y="100" text-anchor="middle" font-size="12">EVENT_ALLOC</text>
+  <path d="M 370 110 L 450 110" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="410" y="100" text-anchor="middle" font-size="12">EVENT_LOCK</text>
+  <path d="M 570 110 L 650 110" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="610" y="100" text-anchor="middle" font-size="12">EVENT_VALIDATE</text>
+  <path d="M 710 140 L 710 280" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="750" y="210" font-size="12">EVENT_DEGRADE</text>
+  <path d="M 650 310 Q 600 210 650 140" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="580" y="230" font-size="12">EVENT_RECOVER</text>
+  <path d="M 650 120 Q 500 200 470 280" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="520" y="200" font-size="12">EVENT_SHARE</text>
+  <path d="M 410 340 L 410 480" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="450" y="410" font-size="12">EVENT_FREE</text>
+</svg>
