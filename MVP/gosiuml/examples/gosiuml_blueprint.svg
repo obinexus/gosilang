@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <title>PhenoMemory State Machine Visualization</title>
+  <rect width="1200" height="800" fill="#f5f5f5"/>
+  <text x="600" y="30" text-anchor="middle" font-family="monospace" font-size="18" font-weight="bold">PhenoMemory Token State Visualization</text>
+  <rect x="100" y="100" width="180" height="120" fill="#e8f4f8" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="190" y="125" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold"></text>
+  <text x="190" y="145" text-anchor="middle" font-family="monospace" font-size="12">ID: 0x3FFBBB10</text>
+  <rect x="320" y="100" width="180" height="120" fill="#e8f4f8" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="410" y="125" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold"></text>
+  <text x="410" y="145" text-anchor="middle" font-family="monospace" font-size="12">ID: 0x0047A08F</text>
+  <rect x="540" y="100" width="180" height="120" fill="#e8f4f8" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="630" y="125" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold">þ</text>
+  <text x="630" y="145" text-anchor="middle" font-family="monospace" font-size="12">ID: 0x0C2D6448</text>
+  <rect x="760" y="100" width="180" height="120" fill="#e8f4f8" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="850" y="125" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold"></text>
+  <text x="850" y="145" text-anchor="middle" font-family="monospace" font-size="12">ID: 0x00000000</text>
+  <rect x="100" y="280" width="180" height="120" fill="#e8f4f8" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="190" y="305" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold"></text>
+  <text x="190" y="325" text-anchor="middle" font-family="monospace" font-size="12">ID: 0x00000000</text>
+  <rect x="320" y="280" width="180" height="120" fill="#e8f4f8" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="410" y="305" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold"></text>
+  <text x="410" y="325" text-anchor="middle" font-family="monospace" font-size="12">ID: 0x00000040</text>
+  <rect x="540" y="280" width="180" height="120" fill="#e8f4f8" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="630" y="305" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold"></text>
+  <text x="630" y="325" text-anchor="middle" font-family="monospace" font-size="12">ID: 0x00000000</text>
+</svg>
