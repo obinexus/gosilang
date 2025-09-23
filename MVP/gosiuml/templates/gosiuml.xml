@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stateMachine xmlns="http://obinexus.org/gosiuml/v1">
+  <metadata>
+    <name>PhenoMemoryStateMachine</name>
+    <version>1.0.0</version>
+    <type>phenomenological_memory</type>
+  </metadata>
+
+  <states>
+    <!-- NIL State (Initial) -->
+    <state id="NIL" type="initial">
+      <properties>
+        <property name="token_id" value="0x00000000"/>
+        <property name="sentinel" value="PHENO_NIL"/>
+        <property name="memory_zone" value="unallocated"/>
+      </properties>
+      <bitfield>
+        <field name="nil_state" bits="1" value="1"/>
+        <field name="allocated" bits="1" value="0"/>
+        <field name="locked" bits="1" value="0"/>
+      </bitfield>
+    </state>
+
+    <!-- ALLOCATED State -->
+    <state id="ALLOCATED">
+      <properties>
+        <property name="memory_zone" value="0-15"/>
+        <property name="ref_count" value="1"/>
+      </properties>
+      <bitfield>
+        <field name="allocated" bits="1" value="1"/>
+        <field name="locked" bits="1" value="0"/>
+        <field name="dirty" bits="1" value="0"/>
+        <field name="ref_count" bits="8" value="0x01"/>
+      </bitfield>
+      <entry-action>atomic_store(&amp;mem_flags.allocated, 1)</entry-action>
+    </state>
+
+    <!-- LOCKED State -->
+    <state id="LOCKED">
+      <properties>
+        <property name="thread_owner" type="thread_id"/>
+        <property name="lock_type" value="exclusive"/>
+      </properties>
+      <bitfield>
+        <field name="locked" bits="1" value="1"/>
+        <field name="coherent" bits="1" value="0"/>
+      </bitfield>
+      <entry-action>acquire_spinlock()</entry-action>
+      <exit-action>release_spinlock()</exit-action>
+    </state>
+
+    <!-- ACTIVE State -->
+    <state id="ACTIVE">
+      <properties>
+        <property name="processing" value="true"/>
+        <property name="coherent" value="true"/>
+      </properties>
+      <substates>
+        <substate id="READING"/>
+        <substate id="WRITING"/>
+        <substate id="TRANSFORMING"/>
+      </substates>
+      <do-activity>process_token_operations()</do-activity>
+    </state>
+
+    <!-- DEGRADED State -->
+    <state id="DEGRADED">
+      <properties>
+        <property name="degradation_score" type="float" range="0.0-1.0"/>
+        <property name="retry_count" type="uint6" max="63"/>
+      </properties>
+      <bitfield>
+        <field name="score" bits="10" comment="0-1023 maps to 0.0-1.0"/>
+        <field name="confidence" bits="10"/>
+        <field name="retry_count" bits="6"/>
+        <field name="priority" bits="6"/>
+      </bitfield>
+      <do-activity>attempt_hitl_recovery()</do-activity>
+    </state>
+  </states>
+
+  <transitions>
+    <transition id="t1" from="NIL" to="ALLOCATED">
+      <trigger>pheno_token_alloc()</trigger>
+      <guard>memory_available()</guard>
+      <action>assign_token_id()</action>
+    </transition>
+
+    <transition id="t2" from="ALLOCATED" to="LOCKED">
+      <trigger>acquire_lock()</trigger>
+      <guard>!is_locked()</guard>
+      <action>atomic_compare_exchange(&amp;locked)</action>
+    </transition>
+
+    <transition id="t3" from="LOCKED" to="ACTIVE">
+      <trigger>validate()</trigger>
+      <guard>verify_geometric_proof()</guard>
+      <action>set_coherent_flag()</action>
+    </transition>
+
+    <transition id="t4" from="ACTIVE" to="DEGRADED">
+      <trigger>degradation_event()</trigger>
+      <guard>degradation_score > 0.6</guard>
+      <action>initiate_recovery()</action>
+    </transition>
+
+    <transition id="t5" from="DEGRADED" to="ACTIVE">
+      <trigger>recovery_complete()</trigger>
+      <guard>verify_integrity()</guard>
+      <action>reset_degradation_metrics()</action>
+    </transition>
+
+    <transition id="t6" from="DEGRADED" to="FREED">
+      <trigger>max_retries_exceeded()</trigger>
+      <guard>retry_count >= 63</guard>
+      <action>cleanup_resources()</action>
+    </transition>
+  </transitions>
+</stateMachine>

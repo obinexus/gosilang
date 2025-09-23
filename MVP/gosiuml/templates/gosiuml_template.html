@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <!-- State node style -->
+    <style type="text/css">
+      .state-node { 
+        fill: #e8f4f8; 
+        stroke: #2196F3; 
+        stroke-width: 2;
+      }
+      .state-active { 
+        fill: #c8e6c9; 
+        stroke: #4CAF50;
+      }
+      .state-degraded { 
+        fill: #ffccbc; 
+        stroke: #FF5722;
+      }
+      .transition { 
+        stroke: #666; 
+        stroke-width: 1.5;
+        fill: none;
+        marker-end: url(#arrow);
+      }
+      .label { 
+        font-family: monospace; 
+        font-size: 12px;
+      }
+    </style>
+    
+    <!-- Arrow marker -->
+    <marker id="arrow" markerWidth="10" markerHeight="10" 
+            refX="9" refY="3" orient="auto">
+      <polygon points="0,0 9,3 0,6" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- State Machine Visualization -->
+  <g id="phenomemory-states">
+    <!-- NIL State -->
+    <rect x="50" y="50" width="120" height="60" class="state-node" rx="5"/>
+    <text x="110" y="85" text-anchor="middle" class="label">NIL</text>
+    
+    <!-- ALLOCATED State -->
+    <rect x="250" y="50" width="120" height="60" class="state-node" rx="5"/>
+    <text x="310" y="85" text-anchor="middle" class="label">ALLOCATED</text>
+    
+    <!-- LOCKED State -->
+    <rect x="450" y="50" width="120" height="60" class="state-node" rx="5"/>
+    <text x="510" y="85" text-anchor="middle" class="label">LOCKED</text>
+    
+    <!-- ACTIVE State (larger for substates) -->
+    <rect x="350" y="200" width="150" height="100" class="state-active" rx="5"/>
+    <text x="425" y="225" text-anchor="middle" class="label">ACTIVE</text>
+    <line x1="350" y1="240" x2="500" y2="240" stroke="#4CAF50"/>
+    <text x="425" y="265" text-anchor="middle" class="label" font-size="10">
+      READ|WRITE|TRANSFORM
+    </text>
+    
+    <!-- DEGRADED State -->
+    <rect x="550" y="350" width="120" height="60" class="state-degraded" rx="5"/>
+    <text x="610" y="385" text-anchor="middle" class="label">DEGRADED</text>
+    
+    <!-- SHARED State -->
+    <rect x="150" y="200" width="120" height="60" class="state-node" rx="5"/>
+    <text x="210" y="235" text-anchor="middle" class="label">SHARED</text>
+    
+    <!-- FREED State -->
+    <rect x="350" y="450" width="120" height="60" class="state-node" rx="5"/>
+    <text x="410" y="485" text-anchor="middle" class="label">FREED</text>
+  </g>
+  
+  <!-- Transitions -->
+  <g id="transitions">
+    <!-- NIL -> ALLOCATED -->
+    <path d="M 170 80 L 250 80" class="transition"/>
+    <text x="210" y="70" class="label" font-size="10">alloc()</text>
+    
+    <!-- ALLOCATED -> LOCKED -->
+    <path d="M 370 80 L 450 80" class="transition"/>
+    <text x="410" y="70" class="label" font-size="10">lock()</text>
+    
+    <!-- LOCKED -> ACTIVE -->
+    <path d="M 510 110 L 425 200" class="transition"/>
+    <text x="470" y="155" class="label" font-size="10">validate()</text>
+    
+    <!-- ACTIVE -> DEGRADED -->
+    <path d="M 500 250 L 550 380" class="transition"/>
+    <text x="525" y="315" class="label" font-size="10">degrade()</text>
+    
+    <!-- DEGRADED -> ACTIVE -->
+    <path d="M 550 380 Q 475 340 425 300" class="transition"/>
+    <text x="475" y="340" class="label" font-size="10">recover()</text>
+    
+    <!-- ACTIVE -> SHARED -->
+    <path d="M 350 250 L 270 230" class="transition"/>
+    <text x="310" y="245" class="label" font-size="10">share()</text>
+    
+    <!-- ACTIVE -> FREED -->
+    <path d="M 425 300 L 410 450" class="transition"/>
+    <text x="430" y="375" class="label" font-size="10">free()</text>
+  </g>
+
+  <!-- Bitfield Representation -->
+  <g id="bitfield-viz" transform="translate(50, 520)">
+    <text x="0" y="0" class="label" font-weight="bold">Memory Flags (32-bit):</text>
+    <rect x="0" y="10" width="20" height="20" fill="#4CAF50"/>
+    <text x="25" y="25" class="label" font-size="10">allocated</text>
+    
+    <rect x="80" y="10" width="20" height="20" fill="#2196F3"/>
+    <text x="105" y="25" class="label" font-size="10">locked</text>
+    
+    <rect x="160" y="10" width="20" height="20" fill="#FFC107"/>
+    <text x="185" y="25" class="label" font-size="10">dirty</text>
+    
+    <rect x="240" y="10" width="80" height="20" fill="#9C27B0"/>
+    <text x="245" y="25" class="label" font-size="10">ref_count[8]</text>
+  </g>
+</svg>

@@ -1,0 +1,68 @@
+@startuml PhenoMemory_StateMachine
+!theme plain
+title PhenoMemory Token State Machine
+
+' Define states
+[*] --> NIL: init()
+
+state NIL {
+  : token_id = 0
+  : memory = unallocated
+  : sentinel = PHENO_NIL
+}
+
+state ALLOCATED {
+  : token_id = assigned
+  : memory = reserved
+  : ref_count = 1
+}
+
+state LOCKED {
+  : thread_lock = true
+  : access = exclusive
+  : dirty_flag = check
+}
+
+state ACTIVE {
+  : processing = true
+  : coherent = maintained
+  : degradation = monitor
+}
+
+state DEGRADED {
+  : score > 0.6
+  : retry_count++
+  : confidence = low
+}
+
+state SHARED {
+  : ref_count > 1
+  : shared = true
+  : pinned = possible
+}
+
+state FREED {
+  : memory = released
+  : token_id = recycled
+}
+
+' State transitions
+NIL --> ALLOCATED : pheno_token_alloc()
+ALLOCATED --> LOCKED : acquire_lock()
+LOCKED --> ACTIVE : validate_geometric_proof()
+ACTIVE --> SHARED : share_token()
+ACTIVE --> DEGRADED : degradation_detected()
+DEGRADED --> ACTIVE : recovery_success()
+DEGRADED --> FREED : max_retries_exceeded()
+SHARED --> ACTIVE : unshare()
+ACTIVE --> FREED : pheno_token_free()
+FREED --> [*] : cleanup()
+
+' Guards and actions
+ALLOCATED : entry/ atomic_store(&allocated, 1)
+LOCKED : entry/ atomic_compare_exchange()
+ACTIVE : do/ process_token_value()
+DEGRADED : do/ attempt_recovery()
+SHARED : exit/ decrement_ref_count()
+
+@enduml

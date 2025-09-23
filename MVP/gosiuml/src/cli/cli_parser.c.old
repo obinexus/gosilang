@@ -1,0 +1,184 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <getopt.h>
+#include "phenomemory_platform.h"
+
+// CLI-specific structures
+typedef struct {
+    StateMachine* sm;
+    int verbose;
+    int test_mode;
+} GosiUMLContext;
+
+// Create CLI context
+GosiUMLContext* create_cli_context(void) {
+    GosiUMLContext* ctx = calloc(1, sizeof(GosiUMLContext));
+    if (ctx) {
+        ctx->sm = create_state_machine();
+        if (!ctx->sm) {
+            free(ctx);
+            return NULL;
+        }
+        initialize_state_machine(ctx->sm);
+    }
+    return ctx;
+}
+
+// Free CLI context
+void free_cli_context(GosiUMLContext* ctx) {
+    if (ctx) {
+        if (ctx->sm) {
+            destroy_state_machine(ctx->sm);
+        }
+        free(ctx);
+    }
+}
+
+// Parse configuration file
+int parse_cli_config(const char* config_file) {
+    FILE* f = fopen(config_file, "r");
+    if (!f) {
+        fprintf(stderr, "Cannot open config file: %s\n", config_file);
+        return -1;
+    }
+    
+    char line[256];
+    while (fgets(line, sizeof(line), f)) {
+        // Skip comments and empty lines
+        if (line[0] == '#' || line[0] == '\n') continue;
+        
+        // Parse configuration directives
+        if (strncmp(line, "verbose=", 8) == 0) {
+            // Set verbose mode
+        } else if (strncmp(line, "test_mode=", 10) == 0) {
+            // Set test mode
+        }
+    }
+    
+    fclose(f);
+    return 0;
+}
+
+// Print token information (updated to match actual structure)
+void print_token_info(PhenoToken* token) {
+    if (!token) return;
+    
+    printf("\n=== Token Information ===\n");
+    printf("Token ID:      0x%08X\n", token->token_id);
+    printf("Sentinel:      %s\n", token->sentinel);
+    printf("Memory Zone:   %u\n", token->memory_zone);
+    printf("Data Size:     %zu bytes\n", token->data_size);
+    printf("Thread Owner:  %lu\n", (unsigned long)token->thread_owner);
+    
+    // Print flags using atomic accessors
+    printf("\nMemory Flags:\n");
+    printf("  Allocated:   %s\n", test_flag(&token->mem_flags, FLAG_ALLOCATED_BIT) ? "Yes" : "No");
+    printf("  Locked:      %s\n", test_flag(&token->mem_flags, FLAG_LOCKED_BIT) ? "Yes" : "No");
+    printf("  Dirty:       %s\n", test_flag(&token->mem_flags, FLAG_DIRTY_BIT) ? "Yes" : "No");
+    printf("  Coherent:    %s\n", test_flag(&token->mem_flags, FLAG_COHERENT_BIT) ? "Yes" : "No");
+    printf("  Processing:  %s\n", test_flag(&token->mem_flags, FLAG_PROCESSING_BIT) ? "Yes" : "No");
+    printf("  Shared:      %s\n", test_flag(&token->mem_flags, FLAG_SHARED_BIT) ? "Yes" : "No");
+    printf("  Ref Count:   %u\n", get_ref_count(&token->mem_flags));
+}
+
+// Display state diagram
+void display_state_diagram(GosiUMLContext* ctx) {
+    if (!ctx || !ctx->sm) return;
+    
+    printf("\n=== GosiUML State Machine Diagram ===\n");
+    printf("\n");
+    printf("    ┌─────┐\n");
+    printf("    │ NIL │ ◄── Initial State\n");
+    printf("    └──┬──┘\n");
+    printf("       │ EVENT_ALLOC\n");
+    printf("       ▼\n");
+    printf("  ┌──────────┐\n");
+    printf("  │ALLOCATED │\n");
+    printf("  └────┬─────┘\n");
+    printf("       │ EVENT_LOCK\n");
+    printf("       ▼\n");
+    printf("   ┌────────┐\n");
+    printf("   │ LOCKED │\n");
+    printf("   └────┬───┘\n");
+    printf("        │ EVENT_VALIDATE\n");
+    printf("        ▼\n");
+    printf("   ┌────────┐     EVENT_DEGRADE    ┌──────────┐\n");
+    printf("   │ ACTIVE │ ───────────────────► │ DEGRADED │\n");
+    printf("   └────┬───┘                       └────┬─────┘\n");
+    printf("        │                                 │\n");
+    printf("        │ EVENT_SHARE                     │ EVENT_RECOVER\n");
+    printf("        ▼                                 ▼\n");
+    printf("   ┌────────┐                        (back to ACTIVE)\n");
+    printf("   │ SHARED │\n");
+    printf("   └────┬───┘\n");
+    printf("        │ EVENT_FREE\n");
+    printf("        ▼\n");
+    printf("   ┌────────┐\n");
+    printf("   │ FREED  │ ◄── Terminal State\n");
+    printf("   └────────┘\n");
+    printf("\n");
+    printf("Current State: %s\n", get_state_name(ctx->sm->current_state));
+    printf("========================\n");
+}
+
+// Parse command line arguments
+int parse_cli_args(int argc, char* argv[]) {
+    int opt;
+    int verbose = 0;
+    const char* config_file = NULL;
+    const char* input_file = NULL;
+    const char* output_file = NULL;
+    
+    static struct option long_options[] = {
+        {"verbose", no_argument, 0, 'v'},
+        {"config", required_argument, 0, 'c'},
+        {"input", required_argument, 0, 'i'},
+        {"output", required_argument, 0, 'o'},
+        {"help", no_argument, 0, 'h'},
+        {0, 0, 0, 0}
+    };
+    
+    while ((opt = getopt_long(argc, argv, "vc:i:o:h", long_options, NULL)) != -1) {
+        switch (opt) {
+            case 'v':
+                verbose = 1;
+                break;
+            case 'c':
+                config_file = optarg;
+                break;
+            case 'i':
+                input_file = optarg;
+                break;
+            case 'o':
+                output_file = optarg;
+                break;
+            case 'h':
+                printf("Usage: %s [options]\n", argv[0]);
+                printf("Options:\n");
+                printf("  -v, --verbose    Enable verbose output\n");
+                printf("  -c, --config     Configuration file\n");
+                printf("  -i, --input      Input file\n");
+                printf("  -o, --output     Output file\n");
+                printf("  -h, --help       Show this help\n");
+                return 0;
+            default:
+                fprintf(stderr, "Unknown option\n");
+                return -1;
+        }
+    }
+    
+    if (verbose) {
+        printf("GosiUML CLI Parser\n");
+        if (config_file) printf("Config: %s\n", config_file);
+        if (input_file) printf("Input: %s\n", input_file);
+        if (output_file) printf("Output: %s\n", output_file);
+    }
+    
+    // Load configuration if provided
+    if (config_file) {
+        return parse_cli_config(config_file);
+    }
+    
+    return 0;
+}
